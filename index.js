@@ -73,7 +73,7 @@ function renderPlanet(planetId=1) {
 	<ul>
 	<li>Diameter: ${planet.diameter}km</li>
 	<li>Gravity: ${planet.gravity}</li>
-	<li>Rotational Period: ${planet.rotational_period} hours</li>
+	<li>Rotation Period: ${planet.rotation_period} hours</li>
 	<li>Orbital Period: ${planet.orbital_period} days</li>
 	</ul>`);
     });
