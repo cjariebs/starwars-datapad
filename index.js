@@ -11,6 +11,7 @@ function swapiGet(identifier) {
 	});
 }
 
+// FIXME
 function getPlanets(page=1) {
     console.log("getting planets page " + page);
     const finalPlanets = [];
