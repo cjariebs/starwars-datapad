@@ -11,18 +11,8 @@ function swapiGet(identifier) {
 	});
 }
 
-// FIXME
 function getPlanets(page=1) {
-    console.log("getting planets page " + page);
-    const finalPlanets = [];
     return swapiGet(`planets/?page=${page}`)
-    .then(json => {
-	if (json.next !== null) {
-	    return getPlanets(++page);
-	} 
-	console.log(finalPlanets);
-	return json.results;
-    });
 }
 
 function getPlanet(planetId) {
@@ -46,22 +36,46 @@ function renderPlanetList() {
 	    mainEle.append(`<li>${planets[i].name}</li>`);
 	}
 	mainEle.append('</ul>');
+
     });
 }
 
-function renderPlanet(planetId) {
-    const mainEle = clearMainEle();
+function getDetailPane() {
+    return $('#detailPane');
+}
+
+function getListPane() {
+    return $('#listPane');
+}
+
+function readyListPane() {
+    const listPane = getListPane(); 
+    listPane.html('');
+    listPane.removeClass('hidden');
+    getDetailPane().addClass('hidden');
+    return listPane;
+}
+
+function readyDetailPane() {
+    const detailPane = getDetailPane(); 
+    detailPane.html('');
+    detailPane.removeClass('hidden');
+    getListPane().addClass('hidden');
+    return detailPane;
+}
+function renderPlanet(planetId=1) {
+    const detailPane = readyDetailPane();
 
     getPlanet(planetId)
     .then(planet => {
-	mainEle.append(`<h1>${planet.name}</h1>`);
-	mainEle.append(`<p>${planet.name} is a ${planet.climate} ${planet.terrain} planet with a population of ${planet.population}. Some notable residents include ${getDigestibleResidents(planet)}. The planet is ${planet.surface_water}% water and ${100-planet.surface_water}% land.</h1>`);
-	mainEle.append('<ul>');
-	mainEle.append(`<li>Diameter: ${planet.diameter}km</li>`);
-	mainEle.append(`<li>Gravity: ${planet.gravity}</li>`);
-	mainEle.append(`<li>Rotational Period: ${planet.rotational_period} hours</li>`);
-	mainEle.append(`<li>Orbital Period: ${planet.orbital_period} days</li>`);
-	mainEle.append('</ul>');
+	detailPane.append(`<h1>${planet.name}</h1>
+	<p>${planet.name} is a ${planet.climate} ${planet.terrain} planet with a population of ${planet.population}. Some notable residents include ${getDigestibleResidents(planet)}. The planet is ${planet.surface_water}% water and ${100-planet.surface_water}% land.</p>
+	<ul>
+	<li>Diameter: ${planet.diameter}km</li>
+	<li>Gravity: ${planet.gravity}</li>
+	<li>Rotational Period: ${planet.rotational_period} hours</li>
+	<li>Orbital Period: ${planet.orbital_period} days</li>
+	</ul>`);
     });
 }
 
@@ -70,7 +84,7 @@ function getDigestibleResidents(planet) {
 }
 
 function init() {
-    renderPlanetList();
+    renderPlanet();
 }
 
 $(init);
