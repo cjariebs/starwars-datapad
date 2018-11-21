@@ -1,63 +1,89 @@
 'use strict';
-$(() => {
+const _playerInfo = {
+    name: "Makaec Aurai",
+    credits: 100000,
+    inventory: [],
+    location: "Tattooine",
+    currentShip: "Slave I",
+};
 
-    const _playerInfo = {
-	name: "Makaec Aurai",
-	credits: 100000,
-	inventory: [],
-	location: "Tattooine",
-	currentShip: "Slave I",
-    };
-    
-    function renderPlayerInfo() {
-	renderPlayerCard();
-	renderPlayerLocation();
-    }
+function getPlayerName() {
+    return _playerInfo.name;
+}
 
-    function renderPlayerCard() {
-	const card = $('.playerCard');
+function getPlayerCredits() {
+    return _playerInfo.credits;
+}
 
-    }
+function getPlayerLocation() {
+    return _playerInfo.location;
+}
 
-    function renderPlayerLocation() {
-	const loc = $('.playerLocation');
+// -------------------------------------------------------------------------
 
-    }
+function renderPlayerInfo() {
+    renderPlayerCard();
+    renderPlayerLocation();
+}
 
-    function renderGameContent() {
-	const content = $('.gameContent');
+function renderPlayerCard() {
+    const card = $('.playerCard');
+    card.html(`<h1>${getPlayerName()}</h1>
+    	   <h2>${getPlayerCredits()}</h2>`);
 
-    }
+}
 
-    function render() {
-	renderPlayerInfo();
-	renderGameContent();
-    }
+function renderPlayerLocation() {
+    const loc = $('.playerLocation');
+    loc.html(`<h1>${getPlayerLocation()}</h1>`);
 
-    // ------------------------------------------------------------------------
+}
 
-    function getPlanets() {
+function renderGameContent() {
+    const content = $('.gameContent');
 
-    }
+}
 
-    function getShips() {
+function render() {
+    renderPlayerInfo();
+    renderGameContent();
+}
 
-    }
+// ------------------------------------------------------------------------
 
-    function buyShip() {
+function getPlanets() {
 
-    }
+}
 
-    function showShip() {
+function getShips() {
 
-    }
+}
 
-    function showPlanet() {
+function buyShip() {
 
-    }
+}
 
-    function flyToPlanet() {
+function showShip() {
 
-    }
-});
+}
 
+function showPlanet() {
+
+}
+
+function gotoPlanet() {
+
+}
+
+// ------------------------------------------------------------------------
+
+function init() {
+    handleInput();
+    render();
+}
+
+function handleInput() {
+
+}
+
+$(init);
