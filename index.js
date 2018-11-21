@@ -1,9 +1,19 @@
 'use strict';
+// -------------------------------------------------------------------------
+// Game State
+
+const _gameState = {
+    action: 'goto_location',
+};
+
+// -------------------------------------------------------------------------
+// Player State
+
 const _playerInfo = {
     name: "Makaec Aurai",
     credits: 100000,
     inventory: [],
-    location: "Tattooine",
+    location: 'Space',
     currentShip: "Slave I",
 };
 
@@ -20,6 +30,7 @@ function getPlayerLocation() {
 }
 
 // -------------------------------------------------------------------------
+// Render Functions
 
 function renderPlayerInfo() {
     renderPlayerCard();
@@ -39,17 +50,56 @@ function renderPlayerLocation() {
 
 }
 
-function renderGameContent() {
+function renderPlanetList(contentPane) {
+    getPlanets()
+    .then(planets => {
+	console.log(planets);
+	contentPane.append('<ul>');
+	for (let i=0; i < planets.results.length; i++) {
+	    let planet = planets.results[i];
+	    contentPane.append(`<li>${planet.name}</li>`);
+	}
+	contentPane.append('</ul>');
+    });
+}
+
+function renderGameState() {
     const content = $('.gameContent');
+    content.html('');
+
+    if (_gameState.action == 'overview') {
+        content.append(`<p>You are in ${getPlayerLocation()}. What would you like to do?</p>`);
+    }
+
+    if (_gameState.action == 'goto_location') {
+	content.append(`<p>Where would you like to go?</p>`);
+	renderPlanetList(content);
+    }
+
 
 }
 
 function render() {
     renderPlayerInfo();
-    renderGameContent();
+    renderGameState();
+}
+
+// -------------------------------------------------------------------------
+// Handle Game State
+
+function gameAction(action) {
+    switch(action) {
+	case 'goto_location':
+	    _gameState.action = 'goto_location';
+	    break;
+	default:
+	    _gameState.action = 'overview';
+	    break;
+    }
 }
 
 // ------------------------------------------------------------------------
+// SWAPI Handlers
 
 function swapiGet(identifier) {
     const uri = 'https://swapi.co/api/' + identifier;
@@ -66,13 +116,21 @@ function swapiGet(identifier) {
 
 
 function getPlanets() {
-    return swapiGet('planets')
-    .then(json => {
-	console.log(json);
-    });
+    return swapiGet('planets');
+}
+
+function getPlanet(planetId) {
+    return swapiGet(`planets/${planetId}`);
+
 }
 
 function getShips() {
+    return swapiGet('starships');
+
+}
+
+function getShip(shipId) {
+    return swapiGet(`starships/${shipId}`);
 
 }
 
@@ -80,11 +138,15 @@ function buyShip() {
 
 }
 
-function showShip() {
+function showShip(shipId) {
+    getShip(shipId)
+    .then();
 
 }
 
-function showPlanet() {
+function showPlanet(planetId) {
+    getPlanet(planetId)
+    .then();
 
 }
 
@@ -93,6 +155,7 @@ function gotoPlanet() {
 }
 
 // ------------------------------------------------------------------------
+// jQuery and App Init
 
 function init() {
     handleInput();
