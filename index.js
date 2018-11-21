@@ -80,7 +80,7 @@ function renderGameState() {
 }
 
 function render() {
-    renderPlayerInfo();
+    //renderPlayerInfo();
     renderGameState();
 }
 

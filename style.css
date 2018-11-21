@@ -2,3 +2,47 @@
     box-sizing: border-box;
 }
 
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.header h1 {
+    text-align: center;
+}
+
+.header nav {
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    padding: 0;
+}
+
+.header nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+
+
+.header nav li {
+    padding: 4px;
+}
+
+.header nav li:hover {
+    background-color: gray;
+}
+
+@media (min-width: 600px) {
+    .header nav ul {
+	padding: 12px;
+    }
+
+    .header nav li {
+        display: inline;
+	padding: 12px;
+    }
+}
+
+
