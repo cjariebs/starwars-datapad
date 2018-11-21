@@ -51,8 +51,25 @@ function render() {
 
 // ------------------------------------------------------------------------
 
-function getPlanets() {
+function swapiGet(identifier) {
+    const uri = 'https://swapi.co/api/' + identifier;
 
+    return fetch(uri)
+	.then(response => {
+	    if (response.ok) {
+		return response.json();
+	    }
+
+	    throw new Error(response.statusText);
+	});
+}
+
+
+function getPlanets() {
+    return swapiGet('planets')
+    .then(json => {
+	console.log(json);
+    });
 }
 
 function getShips() {
