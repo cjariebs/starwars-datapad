@@ -1,169 +1,75 @@
 'use strict';
-// -------------------------------------------------------------------------
-// Game State
-
-const _gameState = {
-    action: 'goto_location',
-};
-
-// -------------------------------------------------------------------------
-// Player State
-
-const _playerInfo = {
-    name: "Makaec Aurai",
-    credits: 100000,
-    inventory: [],
-    location: 'Space',
-    currentShip: "Slave I",
-};
-
-function getPlayerName() {
-    return _playerInfo.name;
-}
-
-function getPlayerCredits() {
-    return _playerInfo.credits;
-}
-
-function getPlayerLocation() {
-    return _playerInfo.location;
-}
-
-// -------------------------------------------------------------------------
-// Render Functions
-
-function renderPlayerInfo() {
-    renderPlayerCard();
-    renderPlayerLocation();
-}
-
-function renderPlayerCard() {
-    const card = $('.playerCard');
-    card.html(`<h1>${getPlayerName()}</h1>
-    	   <h2>${getPlayerCredits()}</h2>`);
-
-}
-
-function renderPlayerLocation() {
-    const loc = $('.playerLocation');
-    loc.html(`<h1>${getPlayerLocation()}</h1>`);
-
-}
-
-function renderPlanetList(contentPane) {
-    getPlanets()
-    .then(planets => {
-	console.log(planets);
-	contentPane.append('<ul>');
-	for (let i=0; i < planets.results.length; i++) {
-	    let planet = planets.results[i];
-	    contentPane.append(`<li>${planet.name}</li>`);
-	}
-	contentPane.append('</ul>');
-    });
-}
-
-function renderGameState() {
-    const content = $('.gameContent');
-    content.html('');
-
-    if (_gameState.action == 'overview') {
-        content.append(`<p>You are in ${getPlayerLocation()}. What would you like to do?</p>`);
-    }
-
-    if (_gameState.action == 'goto_location') {
-	content.append(`<p>Where would you like to go?</p>`);
-	renderPlanetList(content);
-    }
-
-
-}
-
-function render() {
-    //renderPlayerInfo();
-    renderGameState();
-}
-
-// -------------------------------------------------------------------------
-// Handle Game State
-
-function gameAction(action) {
-    switch(action) {
-	case 'goto_location':
-	    _gameState.action = 'goto_location';
-	    break;
-	default:
-	    _gameState.action = 'overview';
-	    break;
-    }
-}
-
-// ------------------------------------------------------------------------
-// SWAPI Handlers
-
 function swapiGet(identifier) {
     const uri = 'https://swapi.co/api/' + identifier;
 
     return fetch(uri)
 	.then(response => {
-	    if (response.ok) {
+	    if (response.ok)
 		return response.json();
-	    }
-
-	    throw new Error(response.statusText);
+	    else
+		throw new Error(response.statusText);
 	});
 }
 
-
-function getPlanets() {
-    return swapiGet('planets');
+function getPlanets(page=1) {
+    console.log("getting planets page " + page);
+    const finalPlanets = [];
+    return swapiGet(`planets/?page=${page}`)
+    .then(json => {
+	if (json.next !== null) {
+	    return getPlanets(++page);
+	} 
+	console.log(finalPlanets);
+	return json.results;
+    });
 }
 
 function getPlanet(planetId) {
     return swapiGet(`planets/${planetId}`);
-
 }
 
-function getShips() {
-    return swapiGet('starships');
-
+function clearMainEle() {
+    const mainEle = $('main');
+    mainEle.html('');
+    return mainEle;
 }
 
-function getShip(shipId) {
-    return swapiGet(`starships/${shipId}`);
+function renderPlanetList() {
+    const mainEle = clearMainEle();
 
+    getPlanets()
+    .then(planets => {
+	console.log(planets);
+	mainEle.append('<ul>');
+	for (let i=0; i < planets.length; i++) {
+	    mainEle.append(`<li>${planets[i].name}</li>`);
+	}
+	mainEle.append('</ul>');
+    });
 }
 
-function buyShip() {
+function renderPlanet(planetId) {
+    const mainEle = clearMainEle();
 
-}
-
-function showShip(shipId) {
-    getShip(shipId)
-    .then();
-
-}
-
-function showPlanet(planetId) {
     getPlanet(planetId)
-    .then();
-
+    .then(planet => {
+	mainEle.append(`<h1>${planet.name}</h1>`);
+	mainEle.append(`<p>${planet.name} is a ${planet.climate} ${planet.terrain} planet with a population of ${planet.population}. Some notable residents include ${getDigestibleResidents(planet)}. The planet is ${planet.surface_water}% water and ${100-planet.surface_water}% land.</h1>`);
+	mainEle.append('<ul>');
+	mainEle.append(`<li>Diameter: ${planet.diameter}km</li>`);
+	mainEle.append(`<li>Gravity: ${planet.gravity}</li>`);
+	mainEle.append(`<li>Rotational Period: ${planet.rotational_period} hours</li>`);
+	mainEle.append(`<li>Orbital Period: ${planet.orbital_period} days</li>`);
+	mainEle.append('</ul>');
+    });
 }
 
-function gotoPlanet() {
-
+function getDigestibleResidents(planet) {
+    return '<a href="#">Luke Skywalker</a>, <a href="#">C-3P0</a>, and <a href="#">Darth Vader</a>';
 }
-
-// ------------------------------------------------------------------------
-// jQuery and App Init
 
 function init() {
-    handleInput();
-    render();
-}
-
-function handleInput() {
-
+    renderPlanetList();
 }
 
 $(init);
