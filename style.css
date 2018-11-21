@@ -45,4 +45,6 @@ body {
     }
 }
 
-
+main {
+    padding: 4px 24px;
+}
