@@ -12,63 +12,54 @@ function swapiGet(identifier) {
 }
 
 function getPlanets(page=1) {
-    return swapiGet(`planets/?page=${page}`)
+    return swapiGet(`planets/?page=${page}`);
 }
 
 function getPlanet(planetId) {
     return swapiGet(`planets/${planetId}`);
 }
 
-function clearMainEle() {
-    const mainEle = $('main');
-    mainEle.html('');
-    return mainEle;
+function readyMainPane() {
+    const mainPane = $('main');
+    mainPane.html('');
+    return mainPane;
 }
 
 function renderPlanetList() {
-    const mainEle = clearMainEle();
+    const pane = readyMainPane();
 
     getPlanets()
-    .then(planets => {
+    .then(json => {
+	const planets = json.results;
 	console.log(planets);
-	mainEle.append('<ul>');
-	for (let i=0; i < planets.length; i++) {
-	    mainEle.append(`<li>${planets[i].name}</li>`);
-	}
-	mainEle.append('</ul>');
 
+	let html = '<ul>';
+	for (let i=0; i < planets.length; i++) {
+	    html += `<li><a href="#planet">${planets[i].name}</a></li>`;
+	}
+	html += '</ul>';
+
+	// TODO: parse URL to get current page and to reconstruct local uri
+	if (json.prev) {
+	    html += `<a href="${json.prev}">Previous</a>`;
+	}
+
+	html += ` Showing 10 of ${json.count} results `;
+
+	if (json.next) {
+	    html += `<a href="${json.next}">Next</a>`;
+	}
+
+	pane.html(html);
     });
 }
 
-function getDetailPane() {
-    return $('#detailPane');
-}
-
-function getListPane() {
-    return $('#listPane');
-}
-
-function readyListPane() {
-    const listPane = getListPane(); 
-    listPane.html('');
-    listPane.removeClass('hidden');
-    getDetailPane().addClass('hidden');
-    return listPane;
-}
-
-function readyDetailPane() {
-    const detailPane = getDetailPane(); 
-    detailPane.html('');
-    detailPane.removeClass('hidden');
-    getListPane().addClass('hidden');
-    return detailPane;
-}
 function renderPlanet(planetId=1) {
-    const detailPane = readyDetailPane();
+    const pane = readyMainPane();
 
     getPlanet(planetId)
     .then(planet => {
-	detailPane.append(`<h1>${planet.name}</h1>
+	pane.html(`<h1>${planet.name}</h1>
 	<p>${planet.name} is a ${planet.climate} ${planet.terrain} planet with a population of ${planet.population}. Some notable residents include ${getDigestibleResidents(planet)}. The planet is ${planet.surface_water}% water and ${100-planet.surface_water}% land.</p>
 	<ul>
 	<li>Diameter: ${planet.diameter}km</li>
@@ -84,7 +75,7 @@ function getDigestibleResidents(planet) {
 }
 
 function init() {
-    renderPlanet();
+    renderPlanetList();
 }
 
 $(init);
