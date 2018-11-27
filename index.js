@@ -140,9 +140,6 @@ function renderPlanet(planetId) {
 	<li>Orbital Period: ${planet.orbital_period} days</li>
 	</ul>`);
 
-	return Promise.resolve(planet);
-    })
-    .then(planet => {
 	renderDigestibleResidents(planet);
     });
 }
