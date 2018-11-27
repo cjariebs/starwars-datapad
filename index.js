@@ -1,7 +1,7 @@
 'use strict';
 function swapiGet(identifier) {
     const uri = 'https://swapi.co/api/' + identifier;
-
+    
     return fetch(uri)
 	.then(response => {
 	    if (response.ok)
@@ -47,8 +47,7 @@ function uriToState(uri) {
 	case 'planet':
 	    // '#planets' no args - list mode
 	    if (params == '') {
-		const page = getPageFromQuery(query);
-		renderPlanetList(page);
+		renderPlanetList(getPageFromQuery(query));
 	    } else {
 		renderPlanet(params);
 	    } 
@@ -74,13 +73,11 @@ function getPlanets(page=1) {
 function getPlanet(planetId) {
     // if params is NaN then use search mode
     if (Number.isNaN(Number.parseInt(planetId))) {
-	console.log('search mode');
 	return swapiGet(`planets/?search=${planetId}`)
         .then(json => {
             return json.results[0];
 	});
     } else {
-	console.log('id mode');
         return swapiGet(`planets/${planetId}`);
     }
 }
@@ -107,7 +104,6 @@ function renderPlanetList(page=1) {
     getPlanets(page)
     .then(json => {
 	const planets = json.results;
-	console.log(planets);
 
 	let html = '<ul>';
 	for (let i=0; i < planets.length; i++) {
@@ -133,26 +129,58 @@ function renderPlanet(planetId) {
     const pane = readyMainPane();
 
     location.hash = `#planets/${planetId}`;
-
     getPlanet(planetId)
     .then(planet => {
 	pane.html(`<h1>${planet.name}</h1>
-	<p>${planet.name} is a ${planet.climate} ${planet.terrain} planet with a population of ${planet.population}. Some notable residents include ${getDigestibleResidents(planet)}. The planet is ${planet.surface_water}% water and ${100-planet.surface_water}% land.</p>
+	<p>${planet.name} is a ${planet.climate} ${planet.terrain} planet with a population of ${planet.population}. Some notable residents include <span class="digestibleResidents"></span> The planet is ${planet.surface_water}% water and ${100-planet.surface_water}% land.</p>
 	<ul>
 	<li>Diameter: ${planet.diameter}km</li>
 	<li>Gravity: ${planet.gravity}</li>
 	<li>Rotation Period: ${planet.rotation_period} hours</li>
 	<li>Orbital Period: ${planet.orbital_period} days</li>
 	</ul>`);
+
+	return Promise.resolve(planet);
+    })
+    .then(planet => {
+	renderDigestibleResidents(planet);
     });
 }
 
 function getDigestibleResidents(planet) {
-    return '<a href="#">Luke Skywalker</a>, <a href="#">C-3P0</a>, and <a href="#">Darth Vader</a>';
+    const residentPromises = planet.residents.map(url => {
+	return swapiGet((url.split('/api/'))[1])
+	.then(json => {
+	    return json;
+	});
+    });
+
+    return Promise.all(residentPromises)
+    .then(result => {
+	return result;
+    });
+}
+
+function renderDigestibleResidents(planet) {
+    getDigestibleResidents(planet)
+    .then(residents => {
+	let html = '';
+	let i = 0;
+	residents.forEach(resident => {
+	    if (i == residents.length-1) {
+		html += `and ${resident.name}.`;
+	    } else {
+		html += `${resident.name}, `
+	    }
+
+	    i += 1;
+	});
+	$('.digestibleResidents').html(html);
+    });
 }
 
 function setupUriHandler() {
-    $(window).on('hashchange', event => {
+    $(window).on('hashchange', () => {
 	uriToState(location.hash);	
     });
 }
