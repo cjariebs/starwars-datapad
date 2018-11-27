@@ -19,19 +19,10 @@ function uriToState(uri) {
     const locator = split.shift();
     const params = split;
 
-    /*
-     * 'planet/Alderaan' -> search
-     * 'planets/Alderaan' -> search
-     * 'planet/2' -> id
-     * 'planets/2' -> id
-     * 'planets?page=2' -> list
-     * 'planet?page=2' -> list
-     */
-
     const validResources = ['', 'planet', 'planets', 'starships', 'starship', 'species', 'people', 'person', 'vehicles', 'vehicle'];
 
-    console.log(`locator ${locator}`);
-    console.log(`params ${params}`);
+    //console.log(`locator ${locator}`);
+    //console.log(`params ${params}`);
 
     if (validResources.indexOf(locator) == -1) {
 	// error case, locator is not valid
@@ -41,7 +32,7 @@ function uriToState(uri) {
     let query = uri.split('?');
     if (query.length > 1) {
 	query = query.pop();
-	console.log(`query ${query}`);
+	//console.log(`query ${query}`);
     } else {
 	query = '';
     }
@@ -56,40 +47,24 @@ function uriToState(uri) {
 	case 'planet':
 	    // '#planets' no args - list mode
 	    if (params == '') {
-		let page = 1;
-		if (query !== '') {
-		    page = (query.split('='))[1];
-		}
-
-		console.log('list mode');
+		const page = getPageFromQuery(query);
 		renderPlanetList(page);
 	    } else {
 		renderPlanet(params);
 	    } 
 	    break;
-/*	
-	case 'starships':
-	    break;
-
-	case 'starship':
-	    break;
-
-	case 'species':
-	    break;
-
-	case 'people':
-	    break;
-
-	case 'person':
-	    break;
-	
-	case 'vehicles':
-	    break;
-
-	case 'vehicle':
-	    break;
-*/
     }
+}
+		
+function getPageFromQuery(query) {
+    let page = 1;
+    if (query !== '') {
+	page = (query.split('='))[1];
+	if (Number.isNaN(page)) {
+	    page = 1;
+	}
+    }
+    return page;
 }
 
 function getPlanets(page=1) {
