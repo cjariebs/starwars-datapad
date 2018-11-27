@@ -1,6 +1,7 @@
 'use strict';
 function swapiGet(identifier) {
     const uri = 'https://swapi.co/api/' + identifier;
+    //console.log(`swapiApi ${uri}`);
     
     return fetch(uri)
 	.then(response => {
@@ -46,7 +47,7 @@ function uriToState(uri) {
 	case 'planets':
 	case 'planet':
 	    // '#planets' no args - list mode
-	    if (params == '') {
+	    if (params == '' || query !== '') {
 		renderPlanetList(getPageFromQuery(query));
 	    } else {
 		renderPlanet(params);
@@ -103,22 +104,21 @@ function renderPlanetList(page=1) {
 
     getPlanets(page)
     .then(json => {
-	const planets = json.results;
-
+	console.log(json);
 	let html = '<ul>';
-	for (let i=0; i < planets.length; i++) {
-	    html += `<li><a href="#planet/${planets[i].name}">${planets[i].name}</a></li>`;
-	}
+	json.results.forEach(planet => {
+	    html += `<li><a href="#planet/${planet.name}">${planet.name}</a></li>`;
+	});
 	html += '</ul>';
 
-	if (json.prev) {
+	if (json.previous) {
 	    html += `<a href="#planets/?page=${page-1}">Previous</a>`;
 	}
 
-	html += ` Showing ${1+((page-1)*10)}-${(1+((page-1)*10))+(planets.length-1)} of ${json.count} results `;
+	html += ` Showing ${1+((page-1)*10)}-${(1+((page-1)*10))+(json.results.length-1)} of ${json.count} results `;
 
 	if (json.next) {
-	    html += `<a href="#planets/?page=${page+1}">Next</a>`;
+	    html += `<a href="#planets/?page=${Number.parseInt(page)+1}">Next</a>`;
 	}
 
 	pane.html(html);
