@@ -1,4 +1,7 @@
 'use strict';
+// ----------------------------------------------------------------------------
+// SWAPI Handlers
+
 function swapiGet(identifier) {
     const uri = 'https://swapi.co/api/' + identifier;
     //console.log(`swapiApi ${uri}`);
@@ -12,6 +15,48 @@ function swapiGet(identifier) {
 	});
 }
 
+function validateResource(resource) {
+    const validResources = ['planets', 'starships', 'species', 'people', 'vehicles'];
+
+    if (validResources.indexOf(resource) == -1) {
+	// error case, resource is not valid
+	console.log(`invalid resource ${resource} specified`);
+	return null;
+    }
+
+    return resource;
+}
+
+function getListResource(resource, page=1) {
+    const validResource = validateResource(resource);
+    if (!validResource) {
+	return;
+    }
+
+    page = Number.parseInt(page) || 1;
+    return swapiGet(`${resource}/?page=${page}`);
+}
+
+function getResource(resource, id=1) {
+    const validResource = validateResource(resource);
+    if (!validResource) {
+	return;
+    }
+
+    // if params is NaN then use search mode
+    if (Number.isNaN(Number.parseInt(id))) {
+	return swapiGet(`${validResource}/?search=${id}`)
+        .then(json => {
+            return json.results[0];
+	});
+    } else {
+        return swapiGet(`${validResource}/${id}`);
+    }
+}
+
+// ----------------------------------------------------------------------------
+// State + Render
+
 function uriToState(uri) {
     console.log(`uriToState: ${uri}`);
     // remove # from beginning of uri
@@ -20,15 +65,13 @@ function uriToState(uri) {
     const locator = split.shift();
     const params = split;
 
-    const validResources = ['', 'planet', 'planets', 'starships', 'starship', 'species', 'people', 'person', 'vehicles', 'vehicle'];
-
-    //console.log(`locator ${locator}`);
-    //console.log(`params ${params}`);
-
-    if (validResources.indexOf(locator) == -1) {
-	// error case, locator is not valid
+    const validResource = validateResource(locator);
+    if (validResource === null) {
+	renderWelcomePage();
 	return;
     }
+
+    //console.log(`params ${params}`);
 
     let query = uri.split('?');
     if (query.length > 1) {
@@ -38,21 +81,10 @@ function uriToState(uri) {
 	query = '';
     }
     
-    switch (locator) {
-	case '':
-	    // no args - welcome page
-	    renderWelcomePage();
-	    break;
-
-	case 'planets':
-	case 'planet':
-	    // '#planets' no args - list mode
-	    if (params == '' || query !== '') {
-		renderPlanetList(getPageFromQuery(query));
-	    } else {
-		renderPlanet(params);
-	    } 
-	    break;
+    if (params == '' || query !== '') {
+	renderListResource(validResource, getPageFromQuery(query));
+    } else {
+	renderResource(validResource, params);
     }
 }
 		
@@ -67,21 +99,6 @@ function getPageFromQuery(query) {
     return page;
 }
 
-function getPlanets(page=1) {
-    return swapiGet(`planets/?page=${page}`);
-}
-
-function getPlanet(planetId) {
-    // if params is NaN then use search mode
-    if (Number.isNaN(Number.parseInt(planetId))) {
-	return swapiGet(`planets/?search=${planetId}`)
-        .then(json => {
-            return json.results[0];
-	});
-    } else {
-        return swapiGet(`planets/${planetId}`);
-    }
-}
 
 function readyMainPane() {
     const mainPane = $('main');
@@ -96,25 +113,30 @@ function renderWelcomePage() {
     pane.html('<h1>Welcome</h1>');
 }
 
-function renderPlanetList(page) {
-    console.log(`rendering planet list at page ${page}`);
-    const pane = readyMainPane();
+function renderListResource(resource, page=1) {
+    console.log(`rendering ${resource} list at page ${page}`);
+    const validResource = validateResource(resource);
+    if (!validResource) {
+	renderWelcomePage();
+	return;
+    }
 
+    const pane = readyMainPane();
     page = Number.parseInt(page) || 1;
     
-    location.hash = `#planets/?page=${page}`;
+    location.hash = `#${validResource}/?page=${page}`;
+    getListResource(validResource, page).then(thenRender);
 
-    getPlanets(page)
-    .then(json => {
+    function thenRender(json) {
 	console.log(json);
 	let html = '<ul>';
-	json.results.forEach(planet => {
-	    html += `<li><a href="#planet/${planet.name}">${planet.name}</a></li>`;
+	json.results.forEach(item => {
+	    html += `<li><a href="#${validResource}/${item.name}">${item.name}</a></li>`;
 	});
 	html += '</ul>';
 
 	if (json.previous) {
-	    html += `<a href="#planets/?page=${page-1}">Previous</a>`;
+	    html += `<a href="#${validResource}/?page=${page-1}">Previous</a>`;
 	}
 
 	const startIndex = 1+((page-1)*10);
@@ -122,18 +144,47 @@ function renderPlanetList(page) {
 	html += ` Showing ${startIndex}-${endIndex} of ${json.count} results `;
 
 	if (json.next) {
-	    html += `<a href="#planets/?page=${page+1}">Next</a>`;
+	    html += `<a href="#${validResource}/?page=${page+1}">Next</a>`;
 	}
 
 	pane.html(html);
+    }
+}
+
+function renderResource(resource, params) {
+    console.log(`rendering resource ${resource} with params ${params}`);
+    const validResource = validateResource(resource);
+    if (!validResource) {
+	renderWelcomePage();
+	return;
+    }
+
+    location.hash = `#${validResource}/${params}`;
+
+    switch (resource) {
+	case 'planets':
+	    renderPlanet(params);
+	    break;
+	case 'people':
+	    renderPerson(params);
+	    break;
+    }
+}
+
+
+function renderPerson(id) {
+    const pane = readyMainPane();
+
+    getResource('people', id)
+    .then(person => {
+	pane.html(`<h1>${person.name}</h1>`);
     });
 }
 
-function renderPlanet(planetId) {
+function renderPlanet(id) {
     const pane = readyMainPane();
 
-    location.hash = `#planets/${planetId}`;
-    getPlanet(planetId)
+    getResource('planets', id)
     .then(planet => {
 	const population = Number.parseInt(planet.population).toLocaleString();
 	const diameter = Number.parseInt(planet.diameter).toLocaleString();
@@ -195,6 +246,9 @@ function renderDigestibleResidents(planet) {
 	$('.digestibleResidents').html(html);
     });
 }
+
+// ----------------------------------------------------------------------------
+// jQuery + init
 
 function setupUriHandler() {
     $(window).on('hashchange', () => {
