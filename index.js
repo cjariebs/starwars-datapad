@@ -139,7 +139,7 @@ function renderPlanet(planetId) {
 	const diameter = Number.parseInt(planet.diameter).toLocaleString();
 
 	pane.html(`<h1>${planet.name}</h1>
-	<p>${planet.name} is a ${planet.climate} ${planet.terrain} planet with a population of ${population}. Some notable residents include <span class="digestibleResidents"></span> The planet is ${planet.surface_water}% water and ${100-planet.surface_water}% land.</p>
+	<p>${planet.name} is a ${planet.climate} ${planet.terrain} planet with a population of ${population}. <span class="digestibleResidents"></span> The planet is ${planet.surface_water}% water and ${100-planet.surface_water}% land.</p>
 	<ul>
 	<li>Diameter: ${diameter}km</li>
 	<li>Gravity: ${planet.gravity}</li>
@@ -168,12 +168,28 @@ function getDigestibleResidents(planet) {
 function renderDigestibleResidents(planet) {
     getDigestibleResidents(planet)
     .then(residents => {
-	let html = '';
+	if (residents.length == 0) {
+	$('.digestibleResidents').html('There are no notable residents.');
+	return;
+	}
+
+	let html = 'Some notable residents include ';
 	residents.forEach((resident, i) => {
+	    html += `<a href="#people/${resident.name}">${resident.name}</a>`;
+
 	    if (i == residents.length-1) {
-		html += `and ${resident.name}.`;
+		html += '.';
 	    } else {
-		html += `${resident.name}, `
+	        if (residents.length == 2) {
+		    html += " and ";
+		}
+
+	        if (residents.length > 2) {
+		    html += ", ";
+		    if (i == residents.length-2) {
+			html += "and "
+		    }
+	        }
 	    }
 	});
 	$('.digestibleResidents').html(html);
