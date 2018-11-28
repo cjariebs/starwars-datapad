@@ -115,7 +115,9 @@ function renderPlanetList(page=1) {
 	    html += `<a href="#planets/?page=${page-1}">Previous</a>`;
 	}
 
-	html += ` Showing ${1+((page-1)*10)}-${(1+((page-1)*10))+(json.results.length-1)} of ${json.count} results `;
+	const startIndex = 1+((page-1)*10);
+	const endIndex = startIndex+(json.results.length-1);
+	html += ` Showing ${startIndex}-${endIndex} of ${json.count} results `;
 
 	if (json.next) {
 	    html += `<a href="#planets/?page=${Number.parseInt(page)+1}">Next</a>`;
