@@ -199,7 +199,7 @@ function renderPerson(id) {
 }
 
 function getDigestiblePersonInfo(person) {
-    let promises = []
+    let promises = [];
 
     promises.push(getResourceFromUrl(person.species[0])
     .then(json => {
