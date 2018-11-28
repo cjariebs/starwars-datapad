@@ -4,7 +4,7 @@
 
 function swapiGet(identifier) {
     const uri = 'https://swapi.co/api/' + identifier;
-    console.log(`swapiApi ${uri}`);
+    //console.log(`swapiGet ${uri}`);
     
     return fetch(uri)
 	.then(response => {
@@ -52,6 +52,10 @@ function getResource(resource, id=1) {
     } else {
         return swapiGet(`${validResource}/${id}`);
     }
+}
+
+function getResourceFromUrl(url) {
+    return swapiGet((url.split('/api/'))[1]);
 }
 
 // -----------------------------------------------------------------------------
@@ -117,6 +121,8 @@ function renderListResource(resource, page=1) {
 	return;
     }
 
+    console.log(`rendering ${validResource} list (page ${page})`);
+
     const pane = readyMainPane();
     page = Number.parseInt(page) || 1;
     
@@ -153,6 +159,8 @@ function renderResource(resource, params) {
 	return;
     }
 
+    console.log(`rendering ${validResource}/${params}`);
+
     location.hash = `#${validResource}/${params}`;
 
     switch (resource) {
@@ -164,7 +172,6 @@ function renderResource(resource, params) {
 	    break;
     }
 }
-
 
 function renderPerson(id) {
     const pane = readyMainPane();
@@ -188,69 +195,92 @@ function renderPerson(id) {
 	    <ul class="digestibleVehicles"></ul>
 	`);
 	renderDigestiblePersonInfo(person);
-	console.log(person);
     });
-}
-
-function getResourceFromUrl(url) {
-    return (url.split('/api/'))[1];
 }
 
 function getDigestiblePersonInfo(person) {
-    console.log('getting digestible person');
+    let promises = []
 
-    /*getResource('species', getResourceFromUrl(person.species))
+    promises.push(getResourceFromUrl(person.species[0])
     .then(json => {
-	console.log(json);
-	digest.species = json.name;
-    });
-   /* promises.push(getResource('planets', getResourceFromUrl(person.homeworld)));
-    promises.push(person.starships.map(url => {
-	return swapiGet(getResourceFromUrl(url))
-	.then(json => {
-	    return json;
-	});
+	return json;
     }));
-    promises.push(person.vehicles.map(url => {
-	return swapiGet(getResourceFromUrl(url))
-	.then(json => {
-	    return json;
-	});
+   
+    promises.push(getResourceFromUrl(person.homeworld)
+    .then(json => {
+	return json;
     }));
+    
+    if (person.starships.length > 0) {
+	const starships = person.starships.map(url => {
+	    return getResourceFromUrl(url)
+	    .then(json => {
+		return json;
+	    });
+	});
+	promises = promises.concat(Promise.all(starships));
+    } else {
+	promises.push([]);
+    }
 
-    console.log(promises);
+    if (person.vehicles.length > 0) {
+	const vehicles = person.vehicles.map(url => {
+	    return getResourceFromUrl(url)
+	    .then(json => {
+		return json;
+	    });
+	});
+	promises = promises.concat(Promise.all(vehicles));
+    } else {
+	promises.push([]);
+    }
 
-    return Promise.all(promises);*/
+    return Promise.all(promises);
 }
 
 function renderDigestiblePersonInfo(person) {
-    console.log('rendering digestible person');
-    /*getDigestiblePersonInfo(person).then(digest => {
-	console.log(digest);
-	renderDigestiblePersonSpecies(digest.species);
-        renderDigestiblePersonHomeworld(digest.homeworld);
-        renderDigestiblePersonStarships(digest.starships);
-        renderDigestiblePersonVehicles(digest.vehicles);
-    });*/
+    getDigestiblePersonInfo(person).then(digest => {
+	renderDigestiblePersonSpecies(digest[0]);
+        renderDigestiblePersonHomeworld(digest[1]);
+        renderDigestiblePersonStarships(digest[2]);
+        renderDigestiblePersonVehicles(digest[3]);
+    });
 }
 
 function renderDigestiblePersonSpecies(species) {
-    $('.digestibleSpecies').text(species);
+    $('.digestibleSpecies').html(`<a href="#species/${species.name}">${species.name}</a>`);
 }
 
 function renderDigestiblePersonHomeworld(homeworld) {
-    $('.digestibleHomeworld').text(homeworld);
+    $('.digestibleHomeworld').html(`<a href="#planets/${homeworld.name}">${homeworld.name}</a>`);
 }
 
 function renderDigestiblePersonStarships(starships) {
-    $('.digestibleStarships').text(starships);
+    let html = '';
+    if (starships.length == 0) {
+	html += '<li>None</li>';
+    }
+
+    starships.forEach(ship => {
+	html += `<li><a href="#starships/${ship.name}">${ship.name}</a></li>`;
+    });
+
+    $('.digestibleStarships').html(html);
 }
 
 function renderDigestiblePersonVehicles(vehicles) {
-    $('.digestibleVehicles').text(vehicles);
+    let html = '';
+    if (vehicles.length == 0) {
+	html += '<li>None</li>';
+    }
+
+    vehicles.forEach(vehicle => {
+	html += `<li><a href="#vehicles/${vehicle.name}">${vehicle.name}</a></li>`;
+    });
+
+    $('.digestibleVehicles').html(html);
 
 }
-
 
 function renderPlanet(id) {
     const pane = readyMainPane();
@@ -275,7 +305,7 @@ function renderPlanet(id) {
 
 function getDigestiblePlanetResidents(planet) {
     const residentPromises = planet.residents.map(url => {
-	return swapiGet(getResourceFromUrl(url))
+	return getResourceFromUrl(url)
 	.then(json => {
 	    return json;
 	});
