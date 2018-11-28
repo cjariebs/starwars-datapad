@@ -54,6 +54,7 @@ function getResource(resource, id=1) {
     }
 }
 
+// returns a resource from the https://swapi.co/api/resource/id format
 function getResourceFromUrl(url) {
     return swapiGet((url.split('/api/'))[1]);
 }
