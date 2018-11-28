@@ -171,6 +171,15 @@ function renderResource(resource, params) {
 	case 'people':
 	    renderPerson(params);
 	    break;
+        case 'species':
+            renderSpecies(params);
+            break;
+        case 'starships':
+            renderStarship(params);
+            break;
+        case 'vehicles':
+            renderVehicle(params);
+            break;
     }
 }
 
@@ -346,6 +355,63 @@ function renderDigestiblePlanetResidents(planet) {
 	    }
 	});
 	$('.digestibleResidents').html(html);
+    });
+}
+
+function renderSpecies(id) {
+    const pane = readyMainPane();
+    getResource('species', id)
+    .then(species => {
+        console.log(species);
+    });
+}
+
+function renderStarship(id) {
+    const pane = readyMainPane();
+    getResource('starships', id)
+    .then(starship => {
+        console.log(starship);
+        const cost = Number.parseInt(starship.cost_in_credits).toLocaleString();
+        const cargo = Number.parseInt(starship.cargo_capacity).toLocaleString();
+        const len = Number.parseInt(starship.length).toLocaleString();
+        const crew = Number.parseInt(starship.crew).toLocaleString();
+        const passengers = Number.parseInt(starship.passengers).toLocaleString();
+
+        pane.html(`
+            <h1>${starship.name}</h1>
+            <h2>${starship.model}</h2>
+            <ul>
+                <li>Manufacturer: ${starship.manufacturer}</li>
+                <li>Class: ${starship.starship_class}</li>
+                <li>Price: ${cost}cr</li>
+                <li>Length: ${len} meters</li>
+                <li>Crew: ${crew}</li>
+                <li>Passengers: ${passengers}</li>
+                <li>Cargo Capacity: ${cargo}kg</li>
+                <li>Supply Capacity: ${starship.consumables}</li>
+                <li>Hyperdrive Rating: ${starship.hyperdrive_rating}</li>
+                <li>Max. Atmosphereic Speed: ${starship.max_atmosphering_speed}</li>
+            </ul>
+            <h3>Known Pilots:</h3>
+            <ul class="digestiblePilots"></ul>
+        `);
+        renderDigestibleStarshipPilots(starship);
+    });
+}
+
+function getDigestibleStarshipPilots(starship) {
+
+}
+
+function renderDigestibleStarshipPilots(starship) {
+
+}
+
+function renderVehicle(id) {
+    const pane = readyMainPane();
+    getResource('vehicles', id)
+    .then(vehicle => {
+        console.log(vehicle);
     });
 }
 
