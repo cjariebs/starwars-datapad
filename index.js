@@ -390,7 +390,7 @@ function renderStarship(id) {
         console.log(starship);
         const cost = Number.parseInt(starship.cost_in_credits).toLocaleString();
         const cargo = Number.parseInt(starship.cargo_capacity).toLocaleString();
-        const len = Number.parseInt(starship.length).toLocaleString();
+        const len = Number.parseFloat(starship.length).toLocaleString();
         const crew = Number.parseInt(starship.crew).toLocaleString();
         const passengers = Number.parseInt(starship.passengers).toLocaleString();
 
@@ -407,7 +407,7 @@ function renderStarship(id) {
                 <li>Cargo Capacity: ${cargo}kg</li>
                 <li>Supply Capacity: ${starship.consumables}</li>
                 <li>Hyperdrive Rating: ${starship.hyperdrive_rating}</li>
-                <li>Max. Atmosphereic Speed: ${starship.max_atmosphering_speed}</li>
+                <li>Max. Atmospheric Speed: ${starship.max_atmosphering_speed}</li>
             </ul>
             <h3>Known Pilots:</h3>
             <ul class="digestiblePilots"></ul>
@@ -429,6 +429,30 @@ function renderVehicle(id) {
     getResource('vehicles', id)
     .then(vehicle => {
         console.log(vehicle);
+        const cost = Number.parseInt(vehicle.cost_in_credits).toLocaleString();
+        const cargo = Number.parseInt(vehicle.cargo_capacity).toLocaleString();
+        const len = Number.parseFloat(vehicle.length).toLocaleString();
+        const crew = Number.parseInt(vehicle.crew).toLocaleString();
+        const passengers = Number.parseInt(vehicle.passengers).toLocaleString();
+
+        pane.html(`
+            <h1>${vehicle.name}</h1>
+            <h2>${vehicle.model}</h2>
+            <ul>
+                <li>Manufacturer: ${vehicle.manufacturer}</li>
+                <li>Class: ${vehicle.vehicle_class}</li>
+                <li>Price: ${cost}cr</li>
+                <li>Length: ${len} meters</li>
+                <li>Crew: ${crew}</li>
+                <li>Passengers: ${passengers}</li>
+                <li>Cargo Capacity: ${cargo}kg</li>
+                <li>Supply Capacity: ${vehicle.consumables}</li>
+                <li>Max. Atmospheric Speed: ${vehicle.max_atmosphering_speed}</li>
+            </ul>
+            <h3>Known Pilots:</h3>
+            <ul class="digestiblePilots"></ul>
+        `);
+        renderDigestibleVehiclePilots(vehicle);
     });
 }
 
