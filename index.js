@@ -363,6 +363,23 @@ function renderSpecies(id) {
     getResource('species', id)
     .then(species => {
         console.log(species);
+        const lifespan = Number.parseInt(species.average_lifespan).toLocaleString();
+
+        pane.html(`
+            <h1>${species.name}</h1>
+            <h2>${species.designation} ${species.classification}</h2>
+            <ul>
+                <li>Homeworld: <span class="digestibleHomeworld"></span></li>
+                <li>Language: ${species.language}</li>
+                <li>Average height: ${species.average_height}cm</li>
+                <li>Skin colors: ${species.skin_colors}</li>
+                <li>Hair colors: ${species.hair_colors}</li>
+                <li>Eye colors: ${species.eye_colors}</li>
+                <li>Average lifespan: ${lifespan} years</li>
+            </ul>
+            <h3>Notable ${species.name}s:</h3>
+            <ul class="digestiblePeople"></ul>
+        `);
     });
 }
 
