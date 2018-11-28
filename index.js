@@ -96,9 +96,11 @@ function renderWelcomePage() {
     pane.html('<h1>Welcome</h1>');
 }
 
-function renderPlanetList(page=1) {
+function renderPlanetList(page) {
     console.log(`rendering planet list at page ${page}`);
     const pane = readyMainPane();
+
+    page = Number.parseInt(page) || 1;
     
     location.hash = `#planets/?page=${page}`;
 
@@ -120,7 +122,7 @@ function renderPlanetList(page=1) {
 	html += ` Showing ${startIndex}-${endIndex} of ${json.count} results `;
 
 	if (json.next) {
-	    html += `<a href="#planets/?page=${Number.parseInt(page)+1}">Next</a>`;
+	    html += `<a href="#planets/?page=${page+1}">Next</a>`;
 	}
 
 	pane.html(html);
