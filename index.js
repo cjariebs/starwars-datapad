@@ -30,7 +30,7 @@ function validateResource(resource) {
 function getListResource(resource, page=1) {
     const validResource = validateResource(resource);
     if (!validResource) {
-	return;
+	return Promise.reject('invalid resorce');
     }
 
     page = Number.parseInt(page) || 1;
