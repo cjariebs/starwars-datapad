@@ -275,7 +275,7 @@ function renderPlanet(id) {
 
 function getDigestiblePlanetResidents(planet) {
     const residentPromises = planet.residents.map(url => {
-	return swapiGet((url.split('/api/'))[1])
+	return swapiGet(getResourceFromUrl(url))
 	.then(json => {
 	    return json;
 	});
