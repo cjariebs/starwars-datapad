@@ -162,15 +162,12 @@ function renderDigestibleResidents(planet) {
     getDigestibleResidents(planet)
     .then(residents => {
 	let html = '';
-	let i = 0;
-	residents.forEach(resident => {
+	residents.forEach((resident, i) => {
 	    if (i == residents.length-1) {
 		html += `and ${resident.name}.`;
 	    } else {
 		html += `${resident.name}, `
 	    }
-
-	    i += 1;
 	});
 	$('.digestibleResidents').html(html);
     });
