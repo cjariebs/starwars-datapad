@@ -1,10 +1,10 @@
 'use strict';
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // SWAPI Handlers
 
 function swapiGet(identifier) {
     const uri = 'https://swapi.co/api/' + identifier;
-    //console.log(`swapiApi ${uri}`);
+    console.log(`swapiApi ${uri}`);
     
     return fetch(uri)
 	.then(response => {
@@ -40,7 +40,7 @@ function getListResource(resource, page=1) {
 function getResource(resource, id=1) {
     const validResource = validateResource(resource);
     if (!validResource) {
-	return;
+	return Promise.reject('invalid resource');
     }
 
     // if params is NaN then use search mode
@@ -54,7 +54,7 @@ function getResource(resource, id=1) {
     }
 }
 
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // State + Render
 
 function uriToState(uri) {
@@ -71,12 +71,9 @@ function uriToState(uri) {
 	return;
     }
 
-    //console.log(`params ${params}`);
-
     let query = uri.split('?');
     if (query.length > 1) {
 	query = query.pop();
-	//console.log(`query ${query}`);
     } else {
 	query = '';
     }
@@ -114,7 +111,6 @@ function renderWelcomePage() {
 }
 
 function renderListResource(resource, page=1) {
-    console.log(`rendering ${resource} list at page ${page}`);
     const validResource = validateResource(resource);
     if (!validResource) {
 	renderWelcomePage();
@@ -128,7 +124,6 @@ function renderListResource(resource, page=1) {
     getListResource(validResource, page).then(thenRender);
 
     function thenRender(json) {
-	console.log(json);
 	let html = '<ul>';
 	json.results.forEach(item => {
 	    html += `<li><a href="#${validResource}/${item.name}">${item.name}</a></li>`;
@@ -152,7 +147,6 @@ function renderListResource(resource, page=1) {
 }
 
 function renderResource(resource, params) {
-    console.log(`rendering resource ${resource} with params ${params}`);
     const validResource = validateResource(resource);
     if (!validResource) {
 	renderWelcomePage();
@@ -177,9 +171,86 @@ function renderPerson(id) {
 
     getResource('people', id)
     .then(person => {
-	pane.html(`<h1>${person.name}</h1>`);
+	pane.html(`
+	    <h1>${person.name}</h1>
+	    <h2>${person.gender} <span class="digestibleSpecies"></span> from <span class="digestibleHomeworld"></span></h2>
+	    <h3>Physical Attributes:</h3>
+	    <ul>
+	      <li>Height: ${person.height}cm</li>
+	      <li>Mass: ${person.mass}kg</li>
+	      <li>Hair color: ${person.hair_color}</li>
+	      <li>Eye color: ${person.eye_color}</li>
+	      <li>Skin color: ${person.skin_color}</li>
+	    </ul>
+	    <h3>Known Starships:</h3>
+	    <ul class="digestibleStarships"></ul>
+	    <h3>Known Vehicles:</h3>
+	    <ul class="digestibleVehicles"></ul>
+	`);
+	renderDigestiblePersonInfo(person);
+	console.log(person);
     });
 }
+
+function getResourceFromUrl(url) {
+    return (url.split('/api/'))[1];
+}
+
+function getDigestiblePersonInfo(person) {
+    console.log('getting digestible person');
+
+    /*getResource('species', getResourceFromUrl(person.species))
+    .then(json => {
+	console.log(json);
+	digest.species = json.name;
+    });
+   /* promises.push(getResource('planets', getResourceFromUrl(person.homeworld)));
+    promises.push(person.starships.map(url => {
+	return swapiGet(getResourceFromUrl(url))
+	.then(json => {
+	    return json;
+	});
+    }));
+    promises.push(person.vehicles.map(url => {
+	return swapiGet(getResourceFromUrl(url))
+	.then(json => {
+	    return json;
+	});
+    }));
+
+    console.log(promises);
+
+    return Promise.all(promises);*/
+}
+
+function renderDigestiblePersonInfo(person) {
+    console.log('rendering digestible person');
+    /*getDigestiblePersonInfo(person).then(digest => {
+	console.log(digest);
+	renderDigestiblePersonSpecies(digest.species);
+        renderDigestiblePersonHomeworld(digest.homeworld);
+        renderDigestiblePersonStarships(digest.starships);
+        renderDigestiblePersonVehicles(digest.vehicles);
+    });*/
+}
+
+function renderDigestiblePersonSpecies(species) {
+    $('.digestibleSpecies').text(species);
+}
+
+function renderDigestiblePersonHomeworld(homeworld) {
+    $('.digestibleHomeworld').text(homeworld);
+}
+
+function renderDigestiblePersonStarships(starships) {
+    $('.digestibleStarships').text(starships);
+}
+
+function renderDigestiblePersonVehicles(vehicles) {
+    $('.digestibleVehicles').text(vehicles);
+
+}
+
 
 function renderPlanet(id) {
     const pane = readyMainPane();
@@ -198,11 +269,11 @@ function renderPlanet(id) {
 	<li>Orbital Period: ${planet.orbital_period} days</li>
 	</ul>`);
 
-	renderDigestibleResidents(planet);
+	renderDigestiblePlanetResidents(planet);
     });
 }
 
-function getDigestibleResidents(planet) {
+function getDigestiblePlanetResidents(planet) {
     const residentPromises = planet.residents.map(url => {
 	return swapiGet((url.split('/api/'))[1])
 	.then(json => {
@@ -216,8 +287,8 @@ function getDigestibleResidents(planet) {
     });
 }
 
-function renderDigestibleResidents(planet) {
-    getDigestibleResidents(planet)
+function renderDigestiblePlanetResidents(planet) {
+    getDigestiblePlanetResidents(planet)
     .then(residents => {
 	if (residents.length == 0) {
 	$('.digestibleResidents').html('There are no notable residents.');
@@ -247,7 +318,7 @@ function renderDigestibleResidents(planet) {
     });
 }
 
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // jQuery + init
 
 function setupUriHandler() {
