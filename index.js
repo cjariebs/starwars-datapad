@@ -135,10 +135,13 @@ function renderPlanet(planetId) {
     location.hash = `#planets/${planetId}`;
     getPlanet(planetId)
     .then(planet => {
+	const population = Number.parseInt(planet.population).toLocaleString();
+	const diameter = Number.parseInt(planet.diameter).toLocaleString();
+
 	pane.html(`<h1>${planet.name}</h1>
-	<p>${planet.name} is a ${planet.climate} ${planet.terrain} planet with a population of ${planet.population}. Some notable residents include <span class="digestibleResidents"></span> The planet is ${planet.surface_water}% water and ${100-planet.surface_water}% land.</p>
+	<p>${planet.name} is a ${planet.climate} ${planet.terrain} planet with a population of ${population}. Some notable residents include <span class="digestibleResidents"></span> The planet is ${planet.surface_water}% water and ${100-planet.surface_water}% land.</p>
 	<ul>
-	<li>Diameter: ${planet.diameter}km</li>
+	<li>Diameter: ${diameter}km</li>
 	<li>Gravity: ${planet.gravity}</li>
 	<li>Rotation Period: ${planet.rotation_period} hours</li>
 	<li>Orbital Period: ${planet.orbital_period} days</li>
