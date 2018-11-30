@@ -112,7 +112,7 @@ function renderWelcomePage() {
     console.log('rendering welcome page');
     const pane = readyMainPane();
 
-    pane.html('<h1>Welcome</h1>');
+    pane.html('<h1>Welcome</h1><p>Choose a category to get started</p>');
 }
 
 function renderListResource(resource, page=1) {
@@ -380,6 +380,32 @@ function renderSpecies(id) {
             <h3>Notable ${species.name}s:</h3>
             <ul class="digestiblePeople"></ul>
         `);
+        renderDigestibleSpeciesPeople(species);
+    });
+}
+
+function getDigestibleSpeciesPeople(species) {
+    const promises = species.people.map(url => {
+	return getResourceFromUrl(url)
+	.then(json => {
+	    return json;
+	});
+    });
+
+    return Promise.all(promises)
+    .then(result => {
+	return result;
+    });
+}
+
+function renderDigestibleSpeciesPeople(species) {
+    getDigestibleSpeciesPeople(species)
+    .then(people => {
+        let html = '';
+        people.forEach(person => {
+            html += `<li><a href="#people/${person.name}">${person.name}</a></li>`;
+        });
+        $('.digestiblePeople').html(html);
     });
 }
 
@@ -417,11 +443,28 @@ function renderStarship(id) {
 }
 
 function getDigestibleStarshipPilots(starship) {
+    const promises = starship.pilots.map(url => {
+	return getResourceFromUrl(url)
+	.then(json => {
+	    return json;
+	});
+    });
 
+    return Promise.all(promises)
+    .then(result => {
+	return result;
+    });
 }
 
 function renderDigestibleStarshipPilots(starship) {
-
+    getDigestibleStarshipPilots(starship)
+    .then(people => {
+        let html = '';
+        people.forEach(person => {
+            html += `<li><a href="#people/${person.name}">${person.name}</a></li>`;
+        });
+        $('.digestiblePilots').html(html);
+    });
 }
 
 function renderVehicle(id) {
@@ -454,6 +497,16 @@ function renderVehicle(id) {
         `);
         renderDigestibleVehiclePilots(vehicle);
     });
+}
+
+// the data for both vehicles and starships is structured the same way
+// avoid duplicating code here
+function getDigestibleVehiclePilots(vehicle) {
+    return getDigestibleStarshipPilots(vehicle);
+}
+
+function renderDigestibleVehiclePilots(vehicle) {
+    renderDigestibleStarshipPilots(vehicle);
 }
 
 // -----------------------------------------------------------------------------
