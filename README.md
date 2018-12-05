@@ -1,14 +1,7 @@
-# async-capstone
+# Starwars Datapad
 ## "API Hack" Capstone Project for Thinkful Full Stack Flex
 
-Using the [Star Wars API](https://swapi.co), display a digital storefront
-for buying and selling Vehicles and Starships.
+Using the [Star Wars API](https://swapi.co), display an encyclopedia about the Star Wars universe.
 
-Initial implementation:
-~~1. Display a list of available Vehicles and Starships.
-2. Implement a basic User "Wallet" that stores Credits.
-3. "Buying" a vehicle deducts from the Wallet.~~
-
-Implementation 2:
-A Star Wars encyclopedia.
-Later on, add controls to make it play like an RPG.
+Technologies:
+Javascript ES6, jQuery, HTML, CSS.
